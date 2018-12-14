@@ -23,6 +23,10 @@ Calculator::Calculator(QWidget *parent) : QWidget(parent)
 		digitButtons[i] = createButton(QString::number(i), SLOT(digitClicked()));
 	}
 
+	Button *pointButton = createButton(".", SLOT(pointClicked()));
+	Button *changeSignButton = createButton("\302\261", SLOT(changeSignClicked()));
+
+
 	//put the widgets on a grid
 	QGridLayout *mainLayout = new QGridLayout;
 	mainLayout -> setSizeConstraint(QLayout::SetFixedSize);
@@ -33,7 +37,10 @@ Calculator::Calculator(QWidget *parent) : QWidget(parent)
 		int col = (i-1)%3 + 1;
 		mainLayout -> addWidget(digitButtons[i], row, col);
 	}
-	mainLayout -> addWidget(digitButtons[0],5,3);
+	mainLayout -> addWidget(digitButtons[0],5,1);
+
+	mainLayout -> addWidget(pointButton,5,2);
+	mainLayout -> addWidget(changeSignButton,5,3);
 
 	setLayout(mainLayout);
 	setWindowTitle("Calculator");
@@ -55,6 +62,29 @@ void Calculator::digitClicked()
 	}
 
 	display->setText(display->text() + QString::number(digitValue));
+}
+
+void Calculator::pointClicked()
+{
+	if (waitingForOperand)
+		display->setText("0");
+	if (!display->text().contains('.'))
+		display->setText(display->text() + ".");
+	waitingForOperand = false;
+}
+
+void Calculator::changeSignClicked()
+{
+	QString text = display->text();
+	double value = text.toDouble();
+
+	if (value > 0.0){
+		text.prepend('-');
+	}else if (value < 0.0){
+		text.remove(0,1);
+	}
+
+	display->setText(text);
 }
 
 Button *Calculator::createButton(const QString &text, const char *member)
