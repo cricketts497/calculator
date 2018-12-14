@@ -1,14 +1,17 @@
 #include <QtWidgets>
+#include <iostream>
+#include <cstring>
 
 #include <cmath>
 
-#include "button.h"
-#include "calculator.h"
+#include "include/button.h"
+#include "include/calculator.h"
 
 //constructor
 Calculator::Calculator(QWidget *parent) : QWidget(parent)
 {
 	sumInMemory = 0.0;
+	waitingForOperand = true;
 
 	//create the widgets
 	display = new QLineEdit("0");
@@ -16,14 +19,21 @@ Calculator::Calculator(QWidget *parent) : QWidget(parent)
 	display -> setAlignment(Qt::AlignRight);
 	display -> setMaxLength(15);
 
-	digitButtons = createButton(QString::number(0), SLOT(digitClicked()));
+	for(int i=0; i<NumDigitButtons; ++i){
+		digitButtons[i] = createButton(QString::number(i), SLOT(digitClicked()));
+	}
 
 	//put the widgets on a grid
 	QGridLayout *mainLayout = new QGridLayout;
 	mainLayout -> setSizeConstraint(QLayout::SetFixedSize);
 	mainLayout -> addWidget(display, 0,0,1,6);
 
-	mainLayout -> addWidget(digitButtons, 1,0);
+	for(int i=1; i<NumDigitButtons; ++i){
+		int row = ((9-i)/3) + 2;
+		int col = (i-1)%3 + 1;
+		mainLayout -> addWidget(digitButtons[i], row, col);
+	}
+	mainLayout -> addWidget(digitButtons[0],5,3);
 
 	setLayout(mainLayout);
 	setWindowTitle("Calculator");
@@ -34,6 +44,15 @@ void Calculator::digitClicked()
 	Button *clickedButton = qobject_cast<Button *>(sender());
 	int digitValue = clickedButton->text().toInt();
 
+	//don't add extra zeros
+	if (display->text() == "0" && digitValue == 0.0){
+		return;
+	}
+
+	if (waitingForOperand){
+		display->clear();
+		waitingForOperand = false;
+	}
 
 	display->setText(display->text() + QString::number(digitValue));
 }

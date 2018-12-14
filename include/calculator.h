@@ -21,11 +21,12 @@ private:
 	Button *createButton(const QString &text, const char *member);
 
 	double sumInMemory;
+	bool waitingForOperand;
 
 	QLineEdit *display;
 
-	Button *digitButtons;
-
+	enum { NumDigitButtons = 10 };
+	Button *digitButtons[NumDigitButtons];
 };
 
 
